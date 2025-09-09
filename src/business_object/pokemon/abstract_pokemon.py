@@ -1,43 +1,64 @@
+import copy
+
 from abc import ABC, abstractmethod
+from typing import List
+
+from business_object.attack.abstract_attack import AbstractAttack
 from business_object.statistic import Statistic
 
-import copy
 
 class AbstractPokemon(ABC):
     """
-    Abstract base class for all Pokemon
+    An abstract pokemon. As an abstract class, it as to be inherited
     """
 
-    def __init__(self, stat_max=None, stat_current=None, level=0, name=None, type_pk=None):
-        self._stat_max: Statistic = stat_max # Annotation de type "hint"
+    # -------------------------------------------------------------------------
+    # Constructor
+    # -------------------------------------------------------------------------
+
+    def __init__(
+        self,
+        stat_max=None,
+        stat_current=None,
+        level=0,
+        name=None,
+        common_attacks=[],
+        special_attack=None,
+    ) -> None:
+        # -----------------------------
+        # Attributes
+        # -----------------------------
+        self._stat_max: Statistic = stat_max
         self._stat_current: Statistic = stat_current
         self._level: int = level
         self._name: str = name
-        self._type: str = type_pk
+        self._common_attacks: List[AbstractAttack] = common_attacks
+        self._special_attack: AbstractAttack = special_attack
 
     # -------------------------------------------------------------------------
-    # Abstract methods
+    # Methods
     # -------------------------------------------------------------------------
+
     @abstractmethod
     def get_pokemon_attack_coef(self) -> float:
         """
-        Méthode vide qui sera déterminée dans les héritiés 
+        Compute a damage multiplier related to the pokemon type.
+
+        Returns :
+            float : the multiplier
         """
         pass
 
-    def level_up(self) -> None:
+    def level_up(self):
         """
         Increase the level by one
         """
         self._level += 1
 
-    def reset_actual_stat(self) -> None:
+    def reset_actual_stat(self):
         self._stat_current = copy.deepcopy(self._stat_max)
 
-    def get_hit(self, damage) -> None:
-        """
-        Decrease health point when receiving damages
-        """
+    def get_hit(self, damage):
         if damage > 0:
             if damage < self.hp_current:
                 self.hp_current -= damage
@@ -47,7 +68,7 @@ class AbstractPokemon(ABC):
     def __str__(self):
         res = "I am " + str(self.name)
         res += ", level : " + str(self.level)
-        res += ", attack coef : " + str(self.get_pokemon_attack_coef())
+        res += ", hp : " + str(self.hp_current)
         return res
 
     # -------------------------------------------------------------------------
@@ -78,6 +99,7 @@ class AbstractPokemon(ABC):
     def speed(self):
         return self._stat_max.speed
 
+    # Current stat_max getter/setter
     @property
     def attack_current(self):
         return self._stat_current.attack
@@ -138,3 +160,11 @@ class AbstractPokemon(ABC):
     @property
     def name(self):
         return self._name
+
+    @property
+    def common_attacks(self):
+        return self._common_attacks
+
+    @property
+    def special_attack(self):
+        return self._special_attack
